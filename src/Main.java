@@ -8,6 +8,7 @@ public class Main {
         String password = "Mustafa0503";
 
         try {
+            //make connection
             Connection connection = DriverManager.getConnection(url, username, password);
 
             Scanner scanner = new Scanner(System.in);
