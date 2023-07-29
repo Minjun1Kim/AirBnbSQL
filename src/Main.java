@@ -5,7 +5,7 @@ public class Main {
     public static void main(String[] args) {
         String url = "jdbc:mysql://127.0.0.1/C43";
         String username = "root";
-        String password = "Mustafa0503";
+        String password = "c43project";
 
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
