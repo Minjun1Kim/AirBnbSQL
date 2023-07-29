@@ -1,3 +1,4 @@
+--SOURCE C:\Users\musta\Desktop\C43Project\CSCC43\src\data.sql
 -- Create the users table
 CREATE TABLE users (
                        user_id INT AUTO_INCREMENT PRIMARY KEY,
