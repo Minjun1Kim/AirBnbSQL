@@ -36,14 +36,16 @@ public class LogIn {
         return isAdmin;
     }
 
-    public static void displayLoginMessage(boolean loginSuccessful, boolean isAdmin) {
+    public static void displayLoginMessage(boolean loginSuccessful, boolean isAdmin, Connection connection) {
         if (loginSuccessful) {
             System.out.println("Login successful!");
 
             if (isAdmin) {
                 System.out.println("Welcome, admin!");
+                AdminOptionPage.displayOptions(connection);
             } else {
                 System.out.println("Welcome, regular user!");
+                OptionPage.displayOptions(connection);
             }
         } else {
             System.out.println("Login failed. Invalid username or password.");

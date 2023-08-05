@@ -6,6 +6,12 @@ public class SignUp {
         System.out.print("Enter a new username: ");
         String newUsername = scanner.next();
 
+        // Check if the username already exists in the database
+        if (isUsernameExists(connection, newUsername)) {
+            System.out.println("Username already exists. Please choose a different username.");
+            return;
+        }
+
         System.out.print("Enter a new password: ");
         String newPassword = scanner.next();
 
@@ -28,5 +34,19 @@ public class SignUp {
         }
 
         preparedStatement.close();
+    }
+
+    private static boolean isUsernameExists(Connection connection, String username) throws SQLException {
+        String selectQuery = "SELECT username FROM users WHERE username = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+        preparedStatement.setString(1, username);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        boolean usernameExists = resultSet.next();
+
+        resultSet.close();
+        preparedStatement.close();
+
+        return usernameExists;
     }
 }

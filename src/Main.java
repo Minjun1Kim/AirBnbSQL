@@ -30,7 +30,7 @@ public class Main {
                 boolean loginSuccessful = LogIn.loginUser(connection, inputUsername, inputPassword, isUserLogin);
                 boolean isAdmin = LogIn.isAdminUser(connection, inputUsername);
 
-                LogIn.displayLoginMessage(loginSuccessful, isAdmin);
+                LogIn.displayLoginMessage(loginSuccessful, isAdmin, connection);
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);
