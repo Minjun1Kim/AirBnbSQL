@@ -5,7 +5,7 @@ public class Main {
     public static void main(String[] args) {
         String url = "jdbc:mysql://127.0.0.1/C43";
         String username = "root";
-        String password = "c43project";
+        String password = "Mustafa0503";
 
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
@@ -30,7 +30,7 @@ public class Main {
                 boolean loginSuccessful = LogIn.loginUser(connection, inputUsername, inputPassword, isUserLogin);
                 boolean isAdmin = LogIn.isAdminUser(connection, inputUsername);
 
-                LogIn.displayLoginMessage(loginSuccessful, isAdmin);
+                LogIn.displayLoginMessage(loginSuccessful, isAdmin, connection);
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);
