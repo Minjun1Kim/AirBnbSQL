@@ -24,6 +24,17 @@ CREATE TABLE listings (
                           price DECIMAL(10, 2)
 );
 
+CREATE TABLE Comments (
+                          comment_id INT AUTO_INCREMENT PRIMARY KEY,
+                          booking_id INT NOT NULL,
+                          description TEXT NOT NULL,
+                          rating INT NOT NULL  CHECK (rating >= 1 AND rating <= 5),
+                          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (booking_id) REFERENCES listings(listing_id),
+
+);
+
+
 -- Insert sample data into the users table
 INSERT INTO users (name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, user_type)
 VALUES

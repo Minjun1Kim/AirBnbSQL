@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -31,6 +33,39 @@ public class Main {
                 boolean isAdmin = LogIn.isAdminUser(connection, inputUsername);
 
                 LogIn.displayLoginMessage(loginSuccessful, isAdmin);
+
+
+                String bookingID = "";
+                String description="";
+                int rating = 0;
+
+                System.out.println("1. Leave a comment\n");
+                do {
+                    System.out.print("Booking id: ");
+                    bookingID = scanner.next();
+
+                    System.out.print("Enter description: ");
+                    description = scanner.next();
+
+                    System.out.print("Enter rating (1-5): ");
+                    try {
+                        rating = scanner.nextInt();
+                    } catch (InputMismatchException e) {
+                        System.out.println("Invalid input. Please enter a valid integer.");
+                        scanner.nextLine(); // Consume the invalid input
+                    }
+                } while (!bookingID.isEmpty() && !description.isEmpty() && (rating < 1 || rating > 5));
+
+                try {
+                    if (!checkIfTableExists(connection, "Comments")) {
+                        Comments.createCommentsTable(connection);
+                    }
+
+                    Comments.addComment(connection, bookingID, description, rating);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);
@@ -43,6 +78,13 @@ public class Main {
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static boolean checkIfTableExists(Connection connection, String tableName) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        try (ResultSet resultSet = metaData.getTables(null, null, tableName, null)) {
+            return resultSet.next();
         }
     }
 }
