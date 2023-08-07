@@ -2,7 +2,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
-
+import java.sql.*;
 public class AdminOptionPage {
     private static Scanner scanner = new Scanner(System.in);
 
@@ -16,7 +16,6 @@ public class AdminOptionPage {
             System.out.println("2. Admin Option 2");
             System.out.println("3. Admin Option 3");
             System.out.println("4. Exit");
-
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
 
@@ -86,6 +85,19 @@ public class AdminOptionPage {
             int rowsAffected = preparedStatement.executeUpdate();
 
             if (rowsAffected > 0) {
+                // Get the ID of the inserted listing
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                int listingId = -1;
+                if (generatedKeys.next()) {
+                    listingId = generatedKeys.getInt(1);
+                }
+
+                // Insert the association into the user_listings table
+                if (listingId > 0) {
+                    insertUserListingAssociation(connection, UserContext.getLoggedInUserId(), listingId);
+                    System.out.println(UserContext.getLoggedInUsername());
+                }
+
                 System.out.println("New listing added successfully!");
             } else {
                 System.out.println("Failed to add the listing. Please try again.");
@@ -106,5 +118,17 @@ public class AdminOptionPage {
     private static void performAdminOption3() {
         // Implement your logic for Admin Option 3 here
         System.out.println("You selected Admin Option 3.");
+    }
+
+
+
+
+    private static void insertUserListingAssociation(Connection connection, int userId, int listingId) throws SQLException {
+        String insertQuery = "INSERT INTO user_listings (user_id, listing_id) VALUES (?, ?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+        preparedStatement.setInt(1, userId);
+        preparedStatement.setInt(2, listingId);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
     }
 }

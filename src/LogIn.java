@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 public class LogIn {
     public static boolean loginUser(Connection connection, String username, String password, boolean isUserLogin) throws SQLException {
-        String selectQuery = "SELECT * FROM users WHERE username = ? AND password = ? AND admin = ?";
+        String selectQuery = "SELECT * FROM users WHERE name = ? AND password = ? AND user_type = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
         preparedStatement.setString(1, username);
         preparedStatement.setString(2, password);
@@ -22,7 +22,7 @@ public class LogIn {
     }
 
     public static boolean isAdminUser(Connection connection, String username) throws SQLException {
-        String selectQuery = "SELECT admin FROM users WHERE username = ? AND admin = true";
+        String selectQuery = "SELECT user_type FROM users WHERE name = ? AND user_type = true";
         PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
         preparedStatement.setString(1, username);
 
@@ -46,9 +46,26 @@ public class LogIn {
             } else {
                 System.out.println("Welcome, regular user!");
                 OptionPage.displayOptions(connection);
+
             }
         } else {
             System.out.println("Login failed. Invalid username or password.");
         }
+    }
+    public static int getUserIdByUsername(Connection connection, String username) throws SQLException {
+        String selectQuery = "SELECT user_id FROM users WHERE name = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+        preparedStatement.setString(1, username);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        int userId = -1;
+        if (resultSet.next()) {
+            userId = resultSet.getInt("user_id");
+        }
+
+        resultSet.close();
+        preparedStatement.close();
+
+        return userId;
     }
 }

@@ -15,17 +15,40 @@ public class SignUp {
         System.out.print("Enter a new password: ");
         String newPassword = scanner.next();
 
+
+        System.out.print("Enter your address: ");
+        String address = scanner.next();
+
+        System.out.print("Enter your date of birth (YYYY-MM-DD): ");
+        String dateOfBirth = scanner.next();
+
+        System.out.print("Enter your occupation: ");
+        String occupation = scanner.next();
+
+        System.out.print("Enter your social insurance number: ");
+        String socialInsuranceNumber = scanner.next();
+
+        System.out.print("Enter your credit card number: ");
+        String creditCardNumber = scanner.next();
+
         System.out.print("Are you registering as an admin? (y/n): ");
         String isAdminInput = scanner.next();
-        boolean isAdmin = isAdminInput.equalsIgnoreCase("y");
+        int userType = isAdminInput.equalsIgnoreCase("y") ? 1 : 0;
 
-        String insertQuery = "INSERT INTO users (username, password, admin) VALUES (?, ?, ?)";
+        String insertQuery = "INSERT INTO users (name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
         preparedStatement.setString(1, newUsername);
-        preparedStatement.setString(2, newPassword);
-        preparedStatement.setBoolean(3, isAdmin);
+        preparedStatement.setString(2, address);
+        preparedStatement.setString(3, dateOfBirth);
+        preparedStatement.setString(4, occupation);
+        preparedStatement.setString(5, socialInsuranceNumber);
+        preparedStatement.setString(6, creditCardNumber);
+        preparedStatement.setString(7, newPassword);
+        preparedStatement.setInt(8, userType);
 
         int rowsAffected = preparedStatement.executeUpdate();
+
 
         if (rowsAffected > 0) {
             System.out.println("Sign up successful! You can now log in.");
@@ -37,7 +60,7 @@ public class SignUp {
     }
 
     private static boolean isUsernameExists(Connection connection, String username) throws SQLException {
-        String selectQuery = "SELECT username FROM users WHERE username = ?";
+        String selectQuery = "SELECT user_id FROM users WHERE name = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
         preparedStatement.setString(1, username);
 

@@ -2,10 +2,12 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
+    //--SOURCE C:\Users\musta\Desktop\C43Project\CSCC43\src\data.sql
     public static void main(String[] args) {
         String url = "jdbc:mysql://127.0.0.1/C43";
         String username = "root";
         String password = "Mustafa0503";
+        UserContext user = new UserContext();
 
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
@@ -29,8 +31,13 @@ public class Main {
                 boolean isUserLogin = choice == 1;
                 boolean loginSuccessful = LogIn.loginUser(connection, inputUsername, inputPassword, isUserLogin);
                 boolean isAdmin = LogIn.isAdminUser(connection, inputUsername);
-
+                if (loginSuccessful) {
+                    UserContext.setLoggedInUsername(inputUsername);
+                    int userId = LogIn.getUserIdByUsername(connection, inputUsername);
+                    UserContext.setLoggedInUserId(userId);
+                }
                 LogIn.displayLoginMessage(loginSuccessful, isAdmin, connection);
+
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);

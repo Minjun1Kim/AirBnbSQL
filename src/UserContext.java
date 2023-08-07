@@ -1,15 +1,20 @@
-public class UserContext{
-    private String username;
+public class UserContext {
+    private static String loggedInUsername;
+    private static int loggedInUserId;
 
-    // Add other user-related information as needed
-
-    public String getUsername() {
-        return username;
+    public static String getLoggedInUsername() {
+        return loggedInUsername;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public static void setLoggedInUsername(String username) {
+        loggedInUsername = username;
     }
 
-    // Add other setter and getter methods for other user-related information
+    public static int getLoggedInUserId() {
+        return loggedInUserId;
+    }
+
+    public static void setLoggedInUserId(int userId) {
+        loggedInUserId = userId;
+    }
 }
