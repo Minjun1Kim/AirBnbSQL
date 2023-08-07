@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -69,7 +71,7 @@ public class GeoCode {
         return null;
     }
 
-    public static void zipcodePrompt() {
+    public static void zipcodePrompt(Connection connection) throws SQLException {
 
         System.out.print("Enter a postal code: ");
         String postalCode = scanner.nextLine().trim().replace(" ", "");
@@ -80,8 +82,9 @@ public class GeoCode {
             double latitude = latLng[0];
             double longitude = latLng[1];
 
-            System.out.println("Latitude: " + latitude);
-            System.out.println("Longitude: " + longitude);
+            List<Listing> results = ListingSearch.searchListingsByLocation(connection, latitude, longitude, 20);
+            ListingSearch.printSearchResults(results);
+
         } else {
             System.out.println("Failed to retrieve latitude and longitude.");
         }
