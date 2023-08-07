@@ -1,4 +1,3 @@
-USE c43;
 
 -- Drop tables if they exist
 DROP TABLE IF EXISTS NounPhrases;
@@ -38,8 +37,7 @@ CREATE TABLE Comments (
                           description TEXT NOT NULL,
                           rating INT NOT NULL  CHECK (rating >= 1 AND rating <= 5),
                           timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
-
+                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
 );
 
 CREATE TABLE NounPhrases (
@@ -60,9 +58,11 @@ VALUES
 -- Insert sample data into the listings table
 INSERT INTO listings (type, latitude, longitude, address, postal_code, city, country, amenities, price)
 VALUES
-    ('apartment', 43.654260, -79.383190, '789 Yonge St, Toronto', 'M4W 1J7', 'Toronto', 'Canada', 'Wi-Fi, Kitchen, TV', 150.00),
-    ('room', 49.282730, -123.120735, '456 Granville St, Vancouver', 'V6C 1T2', 'Vancouver', 'Canada', 'Wi-Fi, Laundry', 80.00),
-    ('full house', 45.508888, -73.561668, '123 Maple Ave, Montreal', 'H3A 0A1', 'Montreal', 'Canada', 'Pool, Parking, Garden', 250.00);
+    ('apartment', 34.052235, -118.243683, '123 Main St, Los Angeles', '90012', 'Los Angeles', 'USA', 'Gym, Pool, Parking', 180.00),
+    ('room', 51.507350, -0.127758, '456 Oxford St, London', 'W1C 1DX', 'London', 'UK', 'Wi-Fi, Kitchenette', 100.00),
+    ('full house', 48.856613, 2.352222, '789 Champs-Elysees, Paris', '75008', 'Paris', 'France', 'Garden, Fireplace', 350.00),
+    ('apartment', 40.712776, -74.005974, '456 Broadway, New York', '10013', 'New York', 'USA', 'Central Park View', 220.00),
+    ('room', 35.689487, 139.691711, '123 Shibuya St, Tokyo', '150-0002', 'Tokyo', 'Japan', 'Metro Access', 90.00);
 
 INSERT INTO Comments (listing_id, description, rating)
 VALUES
@@ -70,7 +70,8 @@ VALUES
     (1, 'Enjoyed my stay here, highly recommended!', 4),
     (2, 'Nice location and spacious rooms.', 4),
     (3, 'Not a pleasant experience, room was dirty.', 2),
-    (4, 'Beautiful interior and comfortable beds.', 5);
+    (4, 'Beautiful interior and comfortable beds.', 5),
+    (4, 'Beautiful interior and comfortable chairs.', 5);
 
 -- Commit the changes
 COMMIT;

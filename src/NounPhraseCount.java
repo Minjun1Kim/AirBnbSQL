@@ -7,10 +7,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 import java.sql.*;
@@ -18,7 +14,6 @@ import java.sql.*;
 public class NounPhraseCount implements Comparable<NounPhraseCount> {
     private String nounPhrase;
     private int count;
-
 
     public static void createNounPhrasesTable(Connection connection) throws SQLException {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS NounPhrases (" +
@@ -42,10 +37,7 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
         try (Statement statement = connection.createStatement()) {
             String selectCommentsQuery = "SELECT listing_id, description FROM Comments";
 
-            try {
-                ResultSet commentsResultSet = statement.executeQuery(selectCommentsQuery);
-                System.out.println("HELLOooooo");
-
+            try (ResultSet commentsResultSet = statement.executeQuery(selectCommentsQuery)) {
                 while (commentsResultSet.next()) {
                     int listingId = commentsResultSet.getInt("listing_id");
                     String description = commentsResultSet.getString("description");
@@ -53,17 +45,14 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
                     // Extract and store noun phrases from the description
                     extractAndStoreNounPhrases(connection, listingId, description);
                 }
-
-                // Rest of your code
             } catch (SQLException e) {
+                System.out.println("An error occurred while executing the query: " + e.getMessage());
                 e.printStackTrace();
             }
-
-
         } catch (SQLException e) {
+            System.out.println("An error occurred while creating a statement: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     public static void extractAndStoreNounPhrases(Connection connection, int listingId, String text) {
@@ -101,7 +90,6 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
     }
 
     private static void storeNounPhrase(Connection connection, int listingId, String nounPhrase) {
-        // Check if the noun phrase already exists for the listing
         String selectQuery = "SELECT id, count FROM NounPhrases WHERE listing_id = ? AND noun_phrase = ?";
 
         try (PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
@@ -116,25 +104,28 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
                     updateNounPhraseCount(connection, id, count);
                 } else {
                     // Noun phrase doesn't exist, insert a new row
-                    insertNounPhrase(connection, listingId, nounPhrase);
+                    insertOrUpdateNounPhrase(connection, listingId, nounPhrase);
                 }
             }
         } catch (SQLException e) {
             System.out.println("An error occurred while checking/storing noun phrase: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private static void insertNounPhrase(Connection connection, int listingId, String nounPhrase) {
-        String insertQuery = "INSERT INTO NounPhrases (listing_id, noun_phrase, count) VALUES (?, ?, ?)";
+    private static void insertOrUpdateNounPhrase(Connection connection, int listingId, String nounPhrase) {
+        String insertOrUpdateQuery = "INSERT INTO NounPhrases (listing_id, noun_phrase, count) " +
+                "VALUES (?, ?, 1) " +
+                "ON DUPLICATE KEY UPDATE count = count + 1";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertOrUpdateQuery)) {
             preparedStatement.setInt(1, listingId);
             preparedStatement.setString(2, nounPhrase);
-            preparedStatement.setInt(3, 1);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("An error occurred while inserting noun phrase: " + e.getMessage());
+            System.out.println("An error occurred while inserting/updating noun phrase: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -148,8 +139,10 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println("An error occurred while updating noun phrase count: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
     public NounPhraseCount(String nounPhrase, int count) {
         this.nounPhrase = nounPhrase;
         this.count = count;
