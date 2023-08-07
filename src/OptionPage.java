@@ -180,7 +180,7 @@ public class OptionPage {
         }
     }
 
-    private static void performOption3(Connection connection) throws SQLException {
+    public static void performOption3(Connection connection) throws SQLException {
         // Implement your logic for Option 3 here
 
         Scanner scanner2 = new Scanner(System.in);

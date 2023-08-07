@@ -1,4 +1,6 @@
+import javax.swing.text.html.Option;
 import java.sql.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -42,6 +44,12 @@ public class Main {
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);
+            } else if (choice == 5) {
+                OptionPage.performOption3(connection);
+
+            } else if (choice == 6) {
+                GeoCode.zipcodePrompt();
+
             } else {
                 System.out.println("Invalid choice. Please select 1, 2, or 3.");
             }
@@ -53,4 +61,5 @@ public class Main {
             e.printStackTrace();
         }
     }
+
 }

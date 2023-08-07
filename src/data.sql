@@ -1,8 +1,8 @@
 -- Drop tables if they exist
 DROP TABLE IF EXISTS NounPhrases;
 DROP TABLE IF EXISTS Comments;
-DROP TABLE IF EXISTS listings;
 DROP TABLE IF EXISTS user_listings;
+DROP TABLE IF EXISTS listings;
 DROP TABLE IF EXISTS users;
 
 

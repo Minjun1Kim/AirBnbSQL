@@ -11,16 +11,18 @@ public class ListingSearch {
 
         String searchQuery = "SELECT * FROM listings WHERE " +
                 "latitude IS NOT NULL AND longitude IS NOT NULL " +
-                "HAVING ? <= ? * " +
+                "AND ? * " + // Distance comparison value
                 "ACOS(SIN(RADIANS(?)) * SIN(RADIANS(latitude)) + COS(RADIANS(?)) * COS(RADIANS(latitude)) * " +
-                "COS(RADIANS(? - longitude)))";
+                "COS(RADIANS(? - longitude))) <= ?";
+
+
 
         try (PreparedStatement statement = connection.prepareStatement(searchQuery)) {
-            statement.setDouble(1, maxDistance);
-            statement.setDouble(2, EARTH_RADIUS_KM);
+            statement.setDouble(1, EARTH_RADIUS_KM);
+            statement.setDouble(2, searchLat);
             statement.setDouble(3, searchLat);
-            statement.setDouble(4, searchLat);
-            statement.setDouble(5, searchLon);
+            statement.setDouble(4, searchLon);
+            statement.setDouble(5, maxDistance);
 
             ResultSet resultSet = statement.executeQuery();
 
