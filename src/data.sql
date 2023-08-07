@@ -22,7 +22,6 @@ CREATE TABLE listings (
                           postal_code VARCHAR(10),
                           city VARCHAR(100),
                           country VARCHAR(100),
-                          amenities VARCHAR(200),
                           price DECIMAL(10, 2)
 );
 CREATE TABLE user_listings (
@@ -32,6 +31,32 @@ CREATE TABLE user_listings (
                                FOREIGN KEY (user_id) REFERENCES users (user_id),
                                FOREIGN KEY (listing_id) REFERENCES listings (listing_id)
 );
+
+
+CREATE TABLE listings_amenities (
+                                    listing_id INT,
+                                    amenity_id INT,
+                                    amenity_name VARCHAR(100) NOT NULL,
+                                    PRIMARY KEY (listing_id, amenity_name),
+                                    FOREIGN KEY (listing_id) REFERENCES listings (listing_id)
+);
+CREATE TABLE amenities (
+                           amenity_id INT PRIMARY KEY AUTO_INCREMENT,
+                           amenity_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE bookings (
+                          booking_id INT AUTO_INCREMENT PRIMARY KEY,
+                          listing_id INT,
+                          user_id INT,
+                          start_date DATE,
+                          end_date DATE,
+                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
+                          FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+
 
 INSERT INTO users (name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type)
 VALUES
@@ -43,10 +68,10 @@ VALUES
     ('u', 'f', '1995-02-04', 'l', '89', '98','1', 0),
     ('a', ' dfg', '1995-02-07', 'o', '67', '56','1', 1);
 
-INSERT INTO listings (type, latitude, longitude, address, postal_code, city, country, amenities, price)
+INSERT INTO listings (type, latitude, longitude, address, postal_code, city, country, price)
 VALUES
-    ('apartment', 43.654260, -79.383190, '789 Yonge St, Toronto', 'M4W 1J7', 'Toronto', 'Canada', 'Wi-Fi, Kitchen, TV', 150.00),
-    ('room', 49.282730, -123.120735, '456 Granville St, Vancouver', 'V6C 1T2', 'Vancouver', 'Canada', 'Wi-Fi, Laundry', 80.00),
-    ('house', 45.508888, -73.561668, '123 Maple Ave, Montreal', 'H3A 0A1', 'Montreal', 'Canada', 'Pool, Parking, Garden', 250.00);
+    ('apartment', 43.654260, -79.383190, '789 Yonge St, Toronto', 'M4W 1J7', 'Toronto', 'Canada', 150.00),
+    ('room', 49.282730, -123.120735, '456 Granville St, Vancouver', 'V6C 1T2', 'Vancouver', 'Canada', 80.00),
+    ('house', 45.508888, -73.561668, '123 Maple Ave, Montreal', 'H3A 0A1', 'Montreal', 'Canada', 250.00);
 
 COMMIT;
