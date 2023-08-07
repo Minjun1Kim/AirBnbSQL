@@ -1,10 +1,12 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.sql.*;
 
 public class OptionPage {
     private static Scanner scanner = new Scanner(System.in);
 
-    public static void displayOptions(Connection connection) {
+    public static void displayOptions(Connection connection) throws SQLException {
         System.out.println("Welcome to the Options Page!");
         boolean running = true;
 
@@ -23,7 +25,7 @@ public class OptionPage {
             } else if (choice == 2) {
                 performOption2(connection);
             } else if (choice == 3) {
-                performOption3();
+                performOption3(connection);
             } else if (choice == 4) {
                 running = false;
             } else {
@@ -178,8 +180,28 @@ public class OptionPage {
         }
     }
 
-    private static void performOption3() {
+    private static void performOption3(Connection connection) throws SQLException {
         // Implement your logic for Option 3 here
-        System.out.println("You selected Option 3.");
+
+        Scanner scanner2 = new Scanner(System.in);
+
+        System.out.print("Enter the latitude of the search location: ");
+        double searchLat = scanner2.nextDouble();
+
+        System.out.print("Enter the longitude of the search location: ");
+        double searchLong = scanner2.nextDouble();
+
+        System.out.print("Enter the maximum distance (in kilometers): ");
+        double maxDistance = scanner2.nextDouble();
+
+        scanner2.close();
+
+        List<Listing> results = ListingSearch.searchListingsByLocation(connection, searchLat, searchLong, maxDistance);
+
+        if (results.isEmpty()) {
+            System.out.println("No listings found within the specified distance.");
+        } else {
+            ListingSearch.printSearchResults(results);
+        }
     }
 }
