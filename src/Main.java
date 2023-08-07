@@ -1,13 +1,18 @@
 import java.sql.*;
 import java.util.Arrays;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
     public static void main(String[] args) {
         String url = "jdbc:mysql://127.0.0.1/C43";
         String username = "root";
         String password = "c43project";
+
+        Logger.getLogger("edu.stanford.nlp").setLevel(Level.WARNING);
 
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
@@ -17,6 +22,7 @@ public class Main {
             System.out.println("1. Log in as user");
             System.out.println("2. Log in as admin");
             System.out.println("3. Sign up");
+            System.out.println("4. Extract noun phrases");
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
 
@@ -69,6 +75,10 @@ public class Main {
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);
+
+            } else if (choice == 4) {
+                NounPhraseCount.createNounPhrasesTable(connection);
+                NounPhraseCount.runNounPhrasesQuery(connection);
             } else {
                 System.out.println("Invalid choice. Please select 1, 2, or 3.");
             }
@@ -87,4 +97,5 @@ public class Main {
             return resultSet.next();
         }
     }
+
 }

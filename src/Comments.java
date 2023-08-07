@@ -1,18 +1,21 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Comments {
 
+    private static final int N = 10;
 
     public static void createCommentsTable(Connection connection) throws SQLException {
         String createTableSQL = "CREATE TABLE Comments (" +
                 "comment_id INT AUTO_INCREMENT PRIMARY KEY," +
-                "booking_id INT NOT NULL," +
+                "listing_id INT NOT NULL," +
                 "description TEXT NOT NULL," +
                 "rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5)," +
                 "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-                "FOREIGN KEY (booking_id) REFERENCES listings(listing_id)" +
+                "FOREIGN KEY (listing_id) REFERENCES listings(listing_id)" +
                 ")";
 
         try (Statement statement = connection.createStatement()) {
@@ -24,11 +27,11 @@ public class Comments {
         }
     }
 
-    public static void addComment(Connection connection, String bookingID, String description, int rating) throws SQLException {
-        String insertQuery = "INSERT INTO Comments (booking_id, description, rating, timestamp) VALUES (?, ?, ?, ?)";
+    public static void addComment(Connection connection, String listingID, String description, int rating) throws SQLException {
+        String insertQuery = "INSERT INTO Comments (listing_id, description, rating, timestamp) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setString(1, bookingID);
+            preparedStatement.setString(1, listingID);
             preparedStatement.setString(2, description);
             preparedStatement.setInt(3, rating);
 
@@ -43,12 +46,4 @@ public class Comments {
         }
     }
 
-    public List<String> getPopularNounPhrases(int listingId) {
-        List<String> popularNounPhrases = new ArrayList<>();
-
-        // Query the stored noun phrases associated with the listing
-        // Rank and retrieve the most popular noun phrases
-
-        return popularNounPhrases;
-    }
 }
