@@ -2,7 +2,8 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
-    //--SOURCE C:\Users\musta\Desktop\C43Project\CSCC43\src\data.sql
+    //for laptop: SOURCE C:\Users\musta\Desktop\C43Project\CSCC43\src\data.sql
+    //for deskop: SOURCE C:\Users\musta\IdeaProjects\NC43\src\data.sql
     public static void main(String[] args) {
         String url = "jdbc:mysql://127.0.0.1/C43";
         String username = "root";
