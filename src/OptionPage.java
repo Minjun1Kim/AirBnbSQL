@@ -341,8 +341,7 @@ public class OptionPage {
         performBooking(connection, userId);
     }
     private static void performOption4(Connection connection) {
-        int userId = UserContext.getLoggedInUserId();
-        List<ListingBooking> bookedListings = fetchBookedListings(connection, userId);
+        List<ListingBooking> bookedListings = fetchBookedListings(connection);
 
         // Print the header for the table
         System.out.println("+------------+------------+---------------+----------------+------------------------------+------------+---------------+-------------------------+-----------+----------------+----------------+");
@@ -358,18 +357,15 @@ public class OptionPage {
         System.out.println("+------------+------------+---------------+----------------+------------------------------+------------+---------------+-------------------------+-----------+----------------+----------------+");
     }
 
-
-    private static List<ListingBooking> fetchBookedListings(Connection connection, int userId) {
+    private static List<ListingBooking> fetchBookedListings(Connection connection) {
         List<ListingBooking> bookedListings = new ArrayList<>();
 
         try {
-            // Prepare the SQL query to fetch booked listings for the specific user
+            // Prepare the SQL query to fetch all booked listings
             String selectQuery = "SELECT b.booking_id, l.listing_id, l.type, l.latitude, l.longitude, l.address, l.postal_code, l.city, l.country, l.price, b.start_date, b.end_date " +
                     "FROM bookings b " +
-                    "JOIN listings l ON b.listing_id = l.listing_id " +
-                    "WHERE b.user_id = ?";
+                    "JOIN listings l ON b.listing_id = l.listing_id";
             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
-            preparedStatement.setInt(1, userId);
 
             // Execute the SQL query and retrieve the result set
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -402,6 +398,7 @@ public class OptionPage {
 
         return bookedListings;
     }
+
     private static void performOption5(Connection connection) {
         try {
             int loggedInUserId = UserContext.getLoggedInUserId();
