@@ -342,7 +342,7 @@ public class OptionPage {
     }
     private static void performOption4(Connection connection) {
         List<ListingBooking> bookedListings = fetchBookedListings(connection);
-
+        System.out.println("These are the units that is not available, any other day is available for any user!");
         // Print the header for the table
         System.out.println("+------------+------------+---------------+----------------+------------------------------+------------+---------------+-------------------------+-----------+----------------+----------------+");
         System.out.println("| Listing ID | Type       | Latitude      | Longitude      | Address                      | Postal     | City          | Country                 | Price     | Start Date     | End Date       |");

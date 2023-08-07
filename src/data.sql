@@ -2,6 +2,7 @@
 CREATE TABLE users (
                        user_id INT AUTO_INCREMENT PRIMARY KEY,
                        name VARCHAR(100) NOT NULL,
+                       real_name VARCHAR(100),
                        address VARCHAR(200),
                        date_of_birth DATE,
                        occupation VARCHAR(100),

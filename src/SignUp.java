@@ -12,9 +12,11 @@ public class SignUp {
             return;
         }
 
+        System.out.print("Enter your real name: ");
+        String realName = scanner.next();
+
         System.out.print("Enter a new password: ");
         String newPassword = scanner.next();
-
 
         System.out.print("Enter your address: ");
         String address = scanner.next();
@@ -35,20 +37,20 @@ public class SignUp {
         String isAdminInput = scanner.next();
         int userType = isAdminInput.equalsIgnoreCase("y") ? 1 : 0;
 
-        String insertQuery = "INSERT INTO users (name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO users (name, real_name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
         preparedStatement.setString(1, newUsername);
-        preparedStatement.setString(2, address);
-        preparedStatement.setString(3, dateOfBirth);
-        preparedStatement.setString(4, occupation);
-        preparedStatement.setString(5, socialInsuranceNumber);
-        preparedStatement.setString(6, creditCardNumber);
-        preparedStatement.setString(7, newPassword);
-        preparedStatement.setInt(8, userType);
+        preparedStatement.setString(2, realName);
+        preparedStatement.setString(3, address);
+        preparedStatement.setString(4, dateOfBirth);
+        preparedStatement.setString(5, occupation);
+        preparedStatement.setString(6, socialInsuranceNumber);
+        preparedStatement.setString(7, creditCardNumber);
+        preparedStatement.setString(8, newPassword);
+        preparedStatement.setInt(9, userType);
 
         int rowsAffected = preparedStatement.executeUpdate();
-
 
         if (rowsAffected > 0) {
             System.out.println("Sign up successful! You can now log in.");
@@ -58,6 +60,7 @@ public class SignUp {
 
         preparedStatement.close();
     }
+
 
     private static boolean isUsernameExists(Connection connection, String username) throws SQLException {
         String selectQuery = "SELECT user_id FROM users WHERE name = ?";
