@@ -18,6 +18,7 @@ import org.json.JSONObject;
 public class GeoCode {
 
     private static String apiKey = "AIzaSyDYZ_TJyePkWdzUGE_JzCLm1J-GqNRZKJw";
+    //https://github.com/stleary/JSON-java
     private static Scanner scanner = new Scanner(System.in);
     private static double[] getLatLngForPostalCode(String apiKey, String postalCode) {
         try {

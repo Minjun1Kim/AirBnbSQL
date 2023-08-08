@@ -50,6 +50,8 @@ public class Main {
             } else if (choice == 6) {
                 GeoCode.zipcodePrompt(connection);
 
+            } else if (choice == 7) {
+                Report.promptReport(connection);
             } else {
                 System.out.println("Invalid choice. Please select 1, 2, or 3.");
             }
