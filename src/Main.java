@@ -1,16 +1,22 @@
+import javax.swing.text.html.Option;
 import java.sql.*;
+
 import java.util.Arrays;
 import java.util.InputMismatchException;
+
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
+    //for laptop: SOURCE C:\Users\musta\Desktop\C43Project\CSCC43\src\data.sql
+    //for deskop: SOURCE C:\Users\musta\IdeaProjects\NC43\src\data.sql
     public static void main(String[] args) {
         String url = "jdbc:mysql://127.0.0.1/C43";
         String username = "root";
         String password = "c43project";
+        UserContext user = new UserContext();
 
         Logger.getLogger("edu.stanford.nlp").setLevel(Level.WARNING);
 
@@ -37,6 +43,13 @@ public class Main {
                 boolean isUserLogin = choice == 1;
                 boolean loginSuccessful = LogIn.loginUser(connection, inputUsername, inputPassword, isUserLogin);
                 boolean isAdmin = LogIn.isAdminUser(connection, inputUsername);
+                if (loginSuccessful) {
+                    UserContext.setLoggedInUsername(inputUsername);
+                    int userId = LogIn.getUserIdByUsername(connection, inputUsername);
+                    UserContext.setLoggedInUserId(userId);
+                }
+                LogIn.displayLoginMessage(loginSuccessful, isAdmin, connection);
+
 
                 LogIn.displayLoginMessage(loginSuccessful, isAdmin);
 
@@ -79,6 +92,14 @@ public class Main {
             } else if (choice == 4) {
                 NounPhraseCount.createNounPhrasesTable(connection);
                 NounPhraseCount.runNounPhrasesQuery(connection);
+            } else if (choice == 5) {
+                OptionPage.performOption3(connection);
+
+            } else if (choice == 6) {
+                GeoCode.zipcodePrompt(connection);
+
+            } else if (choice == 7) {
+                Report.promptReport(connection);
             } else {
                 System.out.println("Invalid choice. Please select 1, 2, or 3.");
             }
@@ -90,6 +111,7 @@ public class Main {
             e.printStackTrace();
         }
     }
+
 
     public static boolean checkIfTableExists(Connection connection, String tableName) throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
