@@ -56,8 +56,19 @@ CREATE TABLE bookings (
                           FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-
-
+CREATE TABLE user_cancellations (
+                                    user_id INT,
+                                    year INT,
+                                    cancellations_count INT,
+                                    PRIMARY KEY (user_id, year),
+                                    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+CREATE TABLE user_deletions (
+                                user_id INT,
+                                deletion_count INT,
+                                PRIMARY KEY (user_id),
+                                FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
 INSERT INTO users (name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type)
 VALUES

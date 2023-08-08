@@ -502,8 +502,8 @@ public class OptionPage {
                 return; // User chose to go back, so return without canceling any booking.
             }
 
-            // Execute the SQL query to check if the booking exists for the current user
-            String checkBookingQuery = "SELECT COUNT(*) AS count FROM bookings WHERE booking_id = ? AND user_id = ?";
+            // Check if the booking exists for the current user
+            String checkBookingQuery = "SELECT COUNT(*) AS count, start_date, end_date FROM bookings WHERE booking_id = ? AND user_id = ?";
             PreparedStatement checkBookingStatement = connection.prepareStatement(checkBookingQuery);
             checkBookingStatement.setInt(1, bookingIdToCancel);
             checkBookingStatement.setInt(2, loggedInUserId);
@@ -512,12 +512,32 @@ public class OptionPage {
             if (bookingResult.next()) {
                 int count = bookingResult.getInt("count");
                 if (count > 0) {
-                    // Booking exists for the current user, proceed to cancel it
-                    String deleteBookingQuery = "DELETE FROM bookings WHERE booking_id = ?";
-                    PreparedStatement deleteBookingStatement = connection.prepareStatement(deleteBookingQuery);
-                    deleteBookingStatement.setInt(1, bookingIdToCancel);
-                    int rowsAffected = deleteBookingStatement.executeUpdate();
-                    if (rowsAffected > 0) {
+                    Date startDate = bookingResult.getDate("start_date");
+                    Date endDate = bookingResult.getDate("end_date");
+
+                    // Get the year of the start_date and end_date
+                    Calendar startCal = Calendar.getInstance();
+                    startCal.setTime(startDate);
+                    int startYear = startCal.get(Calendar.YEAR);
+
+                    Calendar endCal = Calendar.getInstance();
+                    endCal.setTime(endDate);
+                    int endYear = endCal.get(Calendar.YEAR);
+
+                    // Loop through the years between startYear and endYear (inclusive)
+                    for (int year = startYear; year <= endYear; year++) {
+                        // Check if a record exists for the user and the current year in the user_cancellations table
+                        if (isUserCancellationRecordExists(connection, loggedInUserId, year)) {
+                            // If a record exists, update the cancellations_count by incrementing it by 1
+                            updateCancellationsCount(connection, loggedInUserId, year);
+                        } else {
+                            // If no record exists, insert a new row with cancellations_count set to 1
+                            insertUserCancellationRecord(connection, loggedInUserId, year);
+                        }
+                    }
+
+                    // Perform the cancellation operation
+                    if (cancelBooking(connection, bookingIdToCancel)) {
                         System.out.println("Booking with ID " + bookingIdToCancel + " has been canceled successfully.");
                     } else {
                         System.out.println("Failed to cancel booking with ID " + bookingIdToCancel + ". Please try again later.");
@@ -529,10 +549,55 @@ public class OptionPage {
                 System.out.println("Failed to check booking with ID " + bookingIdToCancel + ". Please try again later.");
             }
 
+            // Close the result set and prepared statement
+            resultSet.close();
+            preparedStatement.close();
             checkBookingStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+    private static boolean isUserCancellationRecordExists(Connection connection, int userId, int year) throws SQLException {
+        String selectQuery = "SELECT COUNT(*) AS count FROM user_cancellations WHERE user_id = ? AND year = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+        preparedStatement.setInt(1, userId);
+        preparedStatement.setInt(2, year);
+        ResultSet resultSet = preparedStatement.executeQuery();
 
+        boolean recordExists = resultSet.next() && resultSet.getInt("count") > 0;
+
+        resultSet.close();
+        preparedStatement.close();
+
+        return recordExists;
+    }
+
+    private static void updateCancellationsCount(Connection connection, int userId, int year) throws SQLException {
+        String updateQuery = "UPDATE user_cancellations SET cancellations_count = cancellations_count + 1 WHERE user_id = ? AND year = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+        preparedStatement.setInt(1, userId);
+        preparedStatement.setInt(2, year);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    private static void insertUserCancellationRecord(Connection connection, int userId, int year) throws SQLException {
+        String insertQuery = "INSERT INTO user_cancellations (user_id, year, cancellations_count) VALUES (?, ?, 1)";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+        preparedStatement.setInt(1, userId);
+        preparedStatement.setInt(2, year);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    private static boolean cancelBooking(Connection connection, int bookingId) throws SQLException {
+        // Perform the cancellation operation
+        String deleteBookingQuery = "DELETE FROM bookings WHERE booking_id = ?";
+        PreparedStatement deleteBookingStatement = connection.prepareStatement(deleteBookingQuery);
+        deleteBookingStatement.setInt(1, bookingId);
+        int rowsAffected = deleteBookingStatement.executeUpdate();
+        deleteBookingStatement.close();
+
+        return rowsAffected > 0;
+    }
 }
