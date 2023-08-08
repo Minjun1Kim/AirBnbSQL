@@ -15,11 +15,12 @@ public class AdminOptionPage {
 
         while (running) {
             System.out.println("Select an admin option:");
-            System.out.println("1. Create List");
-            System.out.println("2. View your own list");
-            System.out.println("3. Remove your list");
-            System.out.println("4. Modify your list");
-            System.out.println("5. View your list's bookings");
+            System.out.println("1. Create a listing");
+            System.out.println("2. View your listings");
+            System.out.println("3. Remove your listing");
+            System.out.println("4. Modify your listing");
+            System.out.println("5. View bookings for your listings");
+            System.out.println("6. Add a comment/review on renter");
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
 
@@ -33,6 +34,8 @@ public class AdminOptionPage {
                 performAdminOption4(connection);
             } else if (choice == 5) {
                 performAdminOption5(connection);
+            } else if (choice == 6) {
+                promptHostComment(connection);
             }else {
                 System.out.println("Invalid choice. Please try again.");
             }
@@ -647,6 +650,49 @@ public class AdminOptionPage {
 
         return isBooked;
     }
+
+    public static void promptHostComment(Connection connection) {
+        performAdminOption5(connection);
+
+        System.out.println("\nLeave a host comment");
+
+        String listingId;
+        String renterName;
+        String description;
+        int rating = 0;
+        int hostId = UserContext.getLoggedInUserId(); // Assuming this method returns the host_id
+
+        do {
+            System.out.print("Listing id: ");
+            listingId = scanner.next();
+
+            System.out.print("Renter's user name: ");
+            renterName = scanner.next();
+
+            System.out.print("Enter description: ");
+            scanner.nextLine(); // Consume newline
+            description = scanner.nextLine();
+
+            System.out.print("Enter rating (1-5): ");
+            rating = scanner.nextInt();
+
+        } while (listingId.isEmpty() || renterName.isEmpty() || description.isEmpty() || rating < 1 || rating > 5);
+
+
+        try {
+            if (!Main.checkIfTableExists(connection, "hostComments")) {
+                Comments.createHostCommentsTable(connection);
+            }
+            Comments.addHostComment(connection, hostId, listingId, renterName, description, rating);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
 
 
 }

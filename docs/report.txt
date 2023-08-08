@@ -24,14 +24,14 @@ Ranking by Total Listings Per Country:
 Country: Canada
 Host: John Doe, Total Listings: 2
 Host: Jane Smith, Total Listings: 2
-Host: Michael Johnson, Total Listings: 2
+Host: Michael Lee, Total Listings: 2
 
 Ranking by Total Listings Per City:
 City: Montreal, Host: Jane Smith, Total Listings: 1
-City: Ottawa, Host: Michael Johnson, Total Listings: 1
+City: Ottawa, Host: Michael Lee, Total Listings: 1
 City: Toronto, Host: John Doe, Total Listings: 1
 City: Toronto, Host: Jane Smith, Total Listings: 1
-City: Toronto, Host: Michael Johnson, Total Listings: 1
+City: Toronto, Host: Michael Lee, Total Listings: 1
 City: Vancouver, Host: John Doe, Total Listings: 1
 
 Possible Commercial Hosts:
@@ -39,16 +39,21 @@ User: John Doe, City: Toronto, Country: Canada, Host Listings: 1, Total Listings
 User: John Doe, City: Vancouver, Country: Canada, Host Listings: 1, Total Listings: 1
 User: Jane Smith, City: Montreal, Country: Canada, Host Listings: 1, Total Listings: 1
 User: Jane Smith, City: Toronto, Country: Canada, Host Listings: 1, Total Listings: 1
-User: Michael Johnson, City: Ottawa, Country: Canada, Host Listings: 1, Total Listings: 1
-User: Michael Johnson, City: Toronto, Country: Canada, Host Listings: 1, Total Listings: 1
+User: Michael Lee, City: Ottawa, Country: Canada, Host Listings: 1, Total Listings: 1
+User: Michael Lee, City: Toronto, Country: Canada, Host Listings: 1, Total Listings: 1
 
 Renter Booking Ranking Report:
 User: Jane Smith, Total Bookings: 3
 User: John Doe, Total Bookings: 2
-User: Michael Johnson, Total Bookings: 2
-User: Emily Williams, Total Bookings: 2
-User: David Brown, Total Bookings: 2
+User: Michael Lee, Total Bookings: 2
+User: u1, Total Bookings: 2
+User: a1, Total Bookings: 2
 
 Renter Booking Ranking Report per City:
 User: Jane Smith, City: Toronto, Total Bookings: 2
 
+Noun Phrase Report:
+Listing ID: 1, Noun Phrases: place (Count: 1), amazing (Count: 1), great view (Count: 1), stay (Count: 1)
+Listing ID: 2, Noun Phrases: Nice location (Count: 1), spacious rooms (Count: 1)
+Listing ID: 3, Noun Phrases: pleasant experience (Count: 1), room (Count: 1), dirty (Count: 1)
+Listing ID: 4, Noun Phrases: Beautiful interior (Count: 2), comfortable beds (Count: 1), comfortable chairs (Count: 1)

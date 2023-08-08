@@ -33,6 +33,27 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
         }
     }
 
+    public static void createHostCommentsTable(Connection connection) throws SQLException {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS hostComments (" +
+                "comment_id INT AUTO_INCREMENT PRIMARY KEY," +
+                "listing_id INT NOT NULL," +
+                "renter_name VARCHAR(100) NOT NULL," +
+                "description TEXT NOT NULL," +
+                "rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5)," +
+                "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "FOREIGN KEY (listing_id) REFERENCES listings(listing_id)," +
+                "FOREIGN KEY (renter_name) REFERENCES users(name)," +
+                ")";
+
+        try (PreparedStatement statement = connection.prepareStatement(createTableSQL)) {
+            statement.executeUpdate();
+            System.out.println("hostComments table created successfully.");
+        } catch (SQLException e) {
+            System.out.println("An error occurred while creating the hostComments table: " + e.getMessage());
+            throw e;
+        }
+    }
+
     public static void runNounPhrasesQuery(Connection connection) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             String selectCommentsQuery = "SELECT listing_id, description FROM Comments";
@@ -54,6 +75,31 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
             e.printStackTrace();
         }
     }
+
+
+    public static void runRenterNounPhrasesQuery(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            String selectCommentsQuery = "SELECT listing_id, renter_name, description FROM hostComments";
+
+            try (ResultSet commentsResultSet = statement.executeQuery(selectCommentsQuery)) {
+                while (commentsResultSet.next()) {
+                    int listingId = commentsResultSet.getInt("listing_id");
+                    String renterName = commentsResultSet.getString("renter_name");
+                    String description = commentsResultSet.getString("description");
+
+                    // Extract and store renter noun phrases from the description
+                    extractAndStoreRenterNounPhrases(connection, listingId, renterName, description);
+                }
+            } catch (SQLException e) {
+                System.out.println("An error occurred while executing the query: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            System.out.println("An error occurred while creating a statement: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     public static void extractAndStoreNounPhrases(Connection connection, int listingId, String text) {
         RedwoodConfiguration.current().clear().apply();
@@ -89,6 +135,41 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
         }
     }
 
+    public static void extractAndStoreRenterNounPhrases(Connection connection, int listingId, String renterName, String text) {
+        RedwoodConfiguration.current().clear().apply();
+
+        // Set up Stanford CoreNLP pipeline
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+        // Process the text
+        Annotation document = new Annotation(text);
+        pipeline.annotate(document);
+
+        // Extract and store renter noun phrases
+        for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+            String currentNounPhrase = "";
+
+            for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+                String word = token.originalText();
+                String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+
+                if (pos.startsWith("NN") || pos.startsWith("JJ")) { // Nouns or adjectives
+                    currentNounPhrase += word + " ";
+                } else if (!currentNounPhrase.isEmpty()) {
+                    storeRenterNounPhrase(connection, listingId, renterName, currentNounPhrase.trim());
+                    currentNounPhrase = "";
+                }
+            }
+
+            if (!currentNounPhrase.isEmpty()) {
+                storeRenterNounPhrase(connection, listingId, renterName, currentNounPhrase.trim());
+            }
+        }
+    }
+
+
     private static void storeNounPhrase(Connection connection, int listingId, String nounPhrase) {
         String selectQuery = "SELECT id, count FROM NounPhrases WHERE listing_id = ? AND noun_phrase = ?";
 
@@ -112,6 +193,32 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
             e.printStackTrace();
         }
     }
+
+    private static void storeRenterNounPhrase(Connection connection, int listingId, String renterName, String nounPhrase) {
+        String selectQuery = "SELECT id, count FROM renterNounPhrases WHERE listing_id = ? AND renter_name = ? AND noun_phrase = ?";
+
+        try (PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
+            selectStatement.setInt(1, listingId);
+            selectStatement.setString(2, renterName);
+            selectStatement.setString(3, nounPhrase);
+
+            try (ResultSet resultSet = selectStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    // Renter noun phrase exists, update the count
+                    int id = resultSet.getInt("id");
+                    int count = resultSet.getInt("count") + 1;
+                    updateRenterNounPhraseCount(connection, id, count);
+                } else {
+                    // Renter noun phrase doesn't exist, insert a new row
+                    insertOrUpdateRenterNounPhrase(connection, listingId, renterName, nounPhrase);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("An error occurred while checking/storing renter noun phrase: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     private static void insertOrUpdateNounPhrase(Connection connection, int listingId, String nounPhrase) {
         String insertOrUpdateQuery = "INSERT INTO NounPhrases (listing_id, noun_phrase, count) " +
@@ -142,6 +249,38 @@ public class NounPhraseCount implements Comparable<NounPhraseCount> {
             e.printStackTrace();
         }
     }
+
+    private static void insertOrUpdateRenterNounPhrase(Connection connection, int listingId, String renterName, String nounPhrase) {
+        String insertOrUpdateQuery = "INSERT INTO renterNounPhrases (listing_id, renter_name, noun_phrase, count) " +
+                "VALUES (?, ?, ?, 1) " +
+                "ON DUPLICATE KEY UPDATE count = count + 1";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertOrUpdateQuery)) {
+            preparedStatement.setInt(1, listingId);
+            preparedStatement.setString(2, renterName);
+            preparedStatement.setString(3, nounPhrase);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("An error occurred while inserting/updating renter noun phrase: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void updateRenterNounPhraseCount(Connection connection, int id, int count) {
+        String updateQuery = "UPDATE renterNounPhrases SET count = ? WHERE id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+            preparedStatement.setInt(1, count);
+            preparedStatement.setInt(2, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("An error occurred while updating renter noun phrase count: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     public NounPhraseCount(String nounPhrase, int count) {
         this.nounPhrase = nounPhrase;

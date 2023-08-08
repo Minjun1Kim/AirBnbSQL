@@ -12,9 +12,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
 
@@ -62,17 +60,39 @@ public class Report {
             contentStream.setFont(font, 12);
 
             float yStart = page.getMediaBox().getHeight() - 50;
+            float margin = 50;
+            float width = page.getMediaBox().getWidth() - 2 * margin;
 
             for (String line : lines) {
+                String[] words = line.split(" ");
+                StringBuilder currentLine = new StringBuilder();
+
+                for (String word : words) {
+                    String testLine = currentLine + word + " ";
+                    float textWidth = font.getStringWidth(testLine) / 1000 * 12;
+
+                    if (textWidth < width) {
+                        currentLine = new StringBuilder(testLine);
+                    } else {
+                        contentStream.beginText();
+                        contentStream.setFont(font, 12);
+                        contentStream.newLineAtOffset(margin, yStart);
+                        contentStream.showText(currentLine.toString());
+                        contentStream.endText();
+                        yStart -= 15;
+
+                        currentLine = new StringBuilder(word + " ");
+                    }
+                }
+
                 contentStream.beginText();
-                contentStream.newLineAtOffset(50, yStart);
-                contentStream.showText(line);
+                contentStream.setFont(font, 12);
+                contentStream.newLineAtOffset(margin, yStart);
+                contentStream.showText(currentLine.toString());
                 contentStream.endText();
                 yStart -= 15;
 
-                // Check if the content stream is approaching the bottom of the page
                 if (yStart < 50) {
-                    // Add a new page and reset yStart
                     contentStream.close();
                     page = new PDPage();
                     document.addPage(page);
@@ -437,9 +457,85 @@ public class Report {
         }
     }
 
+    public static void generateNounPhraseReport(Connection connection) throws SQLException {
+        boolean isNounPhrasesTableEmpty = false;
+        ResultSet checkRs = null;
+        PreparedStatement checkStmt = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            String checkQuery = "SELECT 1 FROM NounPhrases LIMIT 1;";
+            checkStmt = connection.prepareStatement(checkQuery);
+            checkRs = checkStmt.executeQuery();
+            isNounPhrasesTableEmpty = !checkRs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (checkRs != null) {
+                checkRs.close();
+            }
+            if (checkStmt != null) {
+                checkStmt.close();
+            }
+        }
+
+        if (isNounPhrasesTableEmpty) {
+            NounPhraseCount.createNounPhrasesTable(connection);
+            NounPhraseCount.runNounPhrasesQuery(connection);
+        }
+
+        try {
+            String query = "SELECT listing_id, noun_phrase, count FROM NounPhrases;";
+            stmt = connection.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            Map<Integer, List<String>> listingNounPhrasesMap = new HashMap<>();
+
+            while (rs.next()) {
+                int listingId = rs.getInt("listing_id");
+                String nounPhrase = rs.getString("noun_phrase");
+                int count = rs.getInt("count");
+
+                listingNounPhrasesMap.putIfAbsent(listingId, new ArrayList<>());
+                List<String> nounPhrases = listingNounPhrasesMap.get(listingId);
+                nounPhrases.add(nounPhrase + " (Count: " + count + ")");
+            }
+
+            StringBuilder reportContent = new StringBuilder("Noun Phrase Report:\n");
+
+            for (Map.Entry<Integer, List<String>> entry : listingNounPhrasesMap.entrySet()) {
+                int listingId = entry.getKey();
+                List<String> nounPhrases = entry.getValue();
+
+                String phrases = String.join(", ", nounPhrases);
+                String line = "Listing ID: " + listingId + ", Noun Phrases: " + phrases;
+                reportContent.append(line).append("\n");
+            }
+
+            // Specify the file path for the report
+            String reportFilePath = inputTextFilePath;
+
+            // Write the report content to the file
+            writeToTextFile(reportContent.toString(), reportFilePath, true);
+
+            System.out.println("Noun phrase report written to: " + reportFilePath);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Close the ResultSet and PreparedStatement
+            if (rs != null) {
+                rs.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
 
 
-    public static void generateDoc(Connection connection) {
+
+    public static void generateDoc(Connection connection) throws SQLException {
         Scanner scanner = new Scanner(System.in);
 
         writeToTextFile("", inputTextFilePath, false);
@@ -459,6 +555,9 @@ public class Report {
         generateRenterBookingRankingReport(connection, "2023-08-01", "2023-09-01");
 
         generateRenterBookingRankingReportPerCity(connection, "2023-08-01", "2023-09-01", 2);
+
+        generateNounPhraseReport(connection);
+
         processFileAndGeneratePdf();
 
         scanner.close();
@@ -478,7 +577,7 @@ public class Report {
     }
 
 
-    public static void promptReport(Connection connection) {
+    public static void promptReport(Connection connection) throws SQLException {
 //        convertTextToPdf();
 
         Scanner scanner = new Scanner(System.in);

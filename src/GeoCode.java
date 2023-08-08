@@ -72,7 +72,7 @@ public class GeoCode {
         return null;
     }
 
-    public static void zipcodePrompt(Connection connection) throws SQLException {
+    public static void zipcodePrompt(Connection connection, Scanner scanner) throws SQLException {
 
         System.out.print("Enter a postal code: ");
         String postalCode = scanner.nextLine().trim().replace(" ", "");
@@ -91,8 +91,5 @@ public class GeoCode {
         }
 
         // Close the scanner when you're done using it
-        scanner.close();
-
-
     }
 }

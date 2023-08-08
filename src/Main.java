@@ -30,6 +30,7 @@ public class Main {
             System.out.println("2. Log in as admin");
             System.out.println("3. Sign up");
             System.out.println("4. Extract noun phrases");
+            System.out.println("5. Generate Report");
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
 
@@ -51,51 +52,23 @@ public class Main {
                 }
                 LogIn.displayLoginMessage(loginSuccessful, isAdmin, connection);
 
-                String bookingID = "";
-                String description="";
-                int rating = 0;
-
-                System.out.println("1. Leave a comment\n");
-                do {
-                    System.out.print("Booking id: ");
-                    bookingID = scanner.next();
-
-                    System.out.print("Enter description: ");
-                    description = scanner.next();
-
-                    System.out.print("Enter rating (1-5): ");
-                    try {
-                        rating = scanner.nextInt();
-                    } catch (InputMismatchException e) {
-                        System.out.println("Invalid input. Please enter a valid integer.");
-                        scanner.nextLine(); // Consume the invalid input
-                    }
-                } while (!bookingID.isEmpty() && !description.isEmpty() && (rating < 1 || rating > 5));
-
-                try {
-                    if (!checkIfTableExists(connection, "Comments")) {
-                        Comments.createCommentsTable(connection);
-                    }
-
-                    Comments.addComment(connection, bookingID, description, rating);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
             } else if (choice == 3) {
                 // Sign up
                 SignUp.performSignUp(connection, scanner);
 
             } else if (choice == 4) {
-                NounPhraseCount.createNounPhrasesTable(connection);
+                if (!checkIfTableExists(connection, "NounPhrases")) {
+                    NounPhraseCount.createNounPhrasesTable(connection);
+                }
+
+                if (!checkIfTableExists(connection, "renterNounPhrases")) {
+                    NounPhraseCount.createHostCommentsTable(connection);
+                }
+
                 NounPhraseCount.runNounPhrasesQuery(connection);
+                NounPhraseCount.runRenterNounPhrasesQuery(connection);
+
             } else if (choice == 5) {
-                OptionPage.performOption3(connection);
-
-            } else if (choice == 6) {
-                GeoCode.zipcodePrompt(connection);
-
-            } else if (choice == 7) {
                 Report.promptReport(connection);
             } else {
                 System.out.println("Invalid choice. Please select 1, 2, or 3.");

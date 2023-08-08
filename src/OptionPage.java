@@ -16,12 +16,14 @@ public class OptionPage {
 
         while (running) {
             System.out.println("Select an option:");
-            System.out.println("1. View list");
-            System.out.println("2. Search");
-            System.out.println("3. Bookings");
+            System.out.println("1. View listings");
+            System.out.println("2. Search for listings");
+            System.out.println("3. Book a listing");
             System.out.println("4. Check Availabilities");
             System.out.println("5. Check Your Bookings");
             System.out.println("6. Cancel Your Bookings");
+            System.out.println("7. Advanced Search (Coordinates, Zipcode, Prices");
+            System.out.println("8. Add a comment");
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
 
@@ -37,6 +39,10 @@ public class OptionPage {
                 performOption5(connection);
             } else if (choice == 6) {
                 performOption6(connection);
+            } else if (choice == 7) {
+                advancedSearch(connection);
+            } else if (choice == 8) {
+                promptComment(connection);
             }else {
                 System.out.println("Invalid choice. Please try again.");
             }
@@ -44,6 +50,8 @@ public class OptionPage {
 
         System.out.println("Exiting the Options Page. Goodbye!");
     }
+
+
 
     private static void performOption1(Connection connection) {
         try {
@@ -604,21 +612,23 @@ public class OptionPage {
 
         return rowsAffected > 0;
 
+    }
+
     public static void searchCoordinates(Connection connection) throws SQLException {
         // Implement your logic for Option 3 here
 
-        Scanner scanner2 = new Scanner(System.in);
+//        Scanner scanner2 = new Scanner(System.in);
 
         System.out.print("Enter the latitude of the search location: ");
-        double searchLat = scanner2.nextDouble();
+        double searchLat = scanner.nextDouble();
 
         System.out.print("Enter the longitude of the search location: ");
-        double searchLong = scanner2.nextDouble();
+        double searchLong = scanner.nextDouble();
 
         System.out.print("Enter the maximum distance (in kilometers): ");
-        double maxDistance = scanner2.nextDouble();
+        double maxDistance = scanner.nextDouble();
 
-        scanner2.close();
+
 
         List<Listing> results = ListingSearch.searchListingsByLocation(connection, searchLat, searchLong, maxDistance);
 
@@ -628,5 +638,102 @@ public class OptionPage {
             ListingSearch.printSearchResults(results);
         }
 
+    }
+
+    public static void promptComment(Connection connection) {
+
+        performOption5(connection);
+        System.out.println("\nLeave a comment");
+        String bookingID;
+        String description;
+        int rating = 0;
+        int userId = UserContext.getLoggedInUserId();
+
+        do {
+            System.out.print("Listing id: ");
+            bookingID = scanner.next();
+
+            System.out.print("Enter description: ");
+            scanner.nextLine(); // Consume newline
+            description = scanner.nextLine();
+
+            System.out.print("Enter rating (1-5): ");
+            rating = scanner.nextInt();
+
+        } while (bookingID.isEmpty() || description.isEmpty() || rating < 1 || rating > 5);
+
+        try {
+            if (!Main.checkIfTableExists(connection, "Comments")) {
+                Comments.createCommentsTable(connection);
+            }
+            Comments.addComment(connection, userId, bookingID, description, rating);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void advancedSearch(Connection connection) {
+
+        System.out.println("Choose one of the following: ");
+        System.out.println("1. Search by coordinates (latitude and longitude)");
+        System.out.println("2. Search by zipcode");
+        System.out.println("3. Search by prices");
+
+        // Get user's choice
+        int choice = scanner.nextInt();
+
+        try {
+            switch (choice) {
+                case 1:
+                    searchCoordinates(connection);
+                    break;
+                case 2:
+                    GeoCode.zipcodePrompt(connection, scanner);
+                    break;
+                case 3:
+                    searchByPrices(connection);
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void searchByPrices(Connection connection) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter 'ASC' to rank by price in ascending order, or 'DESC' to rank in descending order: ");
+        String rankOrder = scanner.nextLine().toUpperCase();
+
+        String query = "SELECT * FROM listings ORDER BY price " + rankOrder;
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int listingId = rs.getInt("listing_id");
+                String type = rs.getString("type");
+                double price = rs.getDouble("price");
+                // ... other columns
+
+                // Print or process the listing information
+                System.out.println("Listing ID: " + listingId);
+                System.out.println("Type: " + type);
+                System.out.println("Price: " + price);
+                // ... print other columns
+
+                System.out.println("---------------------");
+            }
+
+            // Close the ResultSet and PreparedStatement
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

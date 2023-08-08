@@ -1,10 +1,14 @@
 -- Drop tables if they exist
 DROP TABLE IF EXISTS NounPhrases;
-DROP TABLE IF EXISTS Comments;
+DROP TABLE IF EXISTS renterNounPhrases;
 DROP TABLE IF EXISTS user_listings;
 DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS listings_amenities;
+DROP TABLE IF EXISTS Comments;
+DROP TABLE IF EXISTS hostComments;
 DROP TABLE IF EXISTS listings;
+DROP TABLE IF EXISTS user_cancellations;
+DROP TABLE IF EXISTS user_deletions;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS amenities;
 
@@ -20,7 +24,8 @@ CREATE TABLE users (
                        social_insurance_number VARCHAR(20),
                        credit_card_number VARCHAR(20),
                        password VARCHAR(100) NOT NULL,
-                       user_type TINYINT NOT NULL DEFAULT 0
+                       user_type TINYINT NOT NULL DEFAULT 0,
+                       INDEX idx_name (name)
 );
 
 CREATE TABLE listings (
@@ -39,10 +44,23 @@ CREATE TABLE listings (
 CREATE TABLE Comments (
                           comment_id INT AUTO_INCREMENT PRIMARY KEY,
                           listing_id INT NOT NULL,
+                          user_id INT NOT NULL,
                           description TEXT NOT NULL,
                           rating INT NOT NULL  CHECK (rating >= 1 AND rating <= 5),
                           timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
+                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
+                          FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE hostComments (
+                          comment_id INT AUTO_INCREMENT PRIMARY KEY,
+                          listing_id INT NOT NULL,
+                          renter_name VARCHAR(100) NOT NULL,
+                          description TEXT NOT NULL,
+                          rating INT NOT NULL  CHECK (rating >= 1 AND rating <= 5),
+                          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
+                          FOREIGN KEY (renter_name) REFERENCES users(name)
 );
 
 CREATE TABLE NounPhrases (
@@ -53,6 +71,16 @@ CREATE TABLE NounPhrases (
                              FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
 );
 
+
+CREATE TABLE renterNounPhrases (
+                             id INT AUTO_INCREMENT PRIMARY KEY,
+                             listing_id INT NOT NULL,
+                             renter_name VARCHAR(100) NOT NULL,
+                             noun_phrase TEXT NOT NULL,
+                             count INT NOT NULL,
+                             FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
+                             FOREIGN KEY (renter_name) REFERENCES users(name)
+);
 
 CREATE TABLE user_listings (
                                user_id INT,
@@ -78,38 +106,41 @@ CREATE TABLE amenities (
 );
 
 CREATE TABLE bookings (
-                          booking_id INT AUTO_INCREMENT PRIMARY KEY,
-                          listing_id INT,
-                          user_id INT,
-                          start_date DATE,
-                          end_date DATE,
-                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
-                          FOREIGN KEY (user_id) REFERENCES users(user_id)
+      booking_id INT AUTO_INCREMENT PRIMARY KEY,
+      listing_id INT,
+      user_id INT,
+      start_date DATE,
+      end_date DATE,
+      FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
+      FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 
 CREATE TABLE user_cancellations (
-                                    user_id INT,
-                                    year INT,
-                                    cancellations_count INT,
-                                    PRIMARY KEY (user_id, year),
-                                    FOREIGN KEY (user_id) REFERENCES users (user_id)
+        user_id INT,
+        year INT,
+        cancellations_count INT,
+        PRIMARY KEY (user_id, year),
+        FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 CREATE TABLE user_deletions (
-                                user_id INT,
-                                deletion_count INT,
-                                PRIMARY KEY (user_id),
-                                FOREIGN KEY (user_id) REFERENCES users(user_id)
+        user_id INT,
+        deletion_count INT,
+        PRIMARY KEY (user_id),
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 
-INSERT INTO users (name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type)
+INSERT INTO users (name, real_name, address, date_of_birth, occupation, social_insurance_number, credit_card_number, password, user_type)
 VALUES
-    ('John Doe', '123 Main St, CityA', '1990-05-15', 'Engineer', '123-45-6789', '1234-5678-9012-3456', 'password1', 1),
-    ('Jane Smith', '456 Elm St, CityB', '1985-10-20', 'Teacher', '987-65-4321', '5678-9012-3456-7890', 'password2', 0),
-    ('Michael Johnson', '789 Oak St, CityA', '1995-03-02', 'Student', '456-78-9012', '9012-3456-7890-1234', 'password3', 0),
-    ('Emily Williams', '321 Pine St, CityC', '1992-08-12', 'Doctor', '789-01-2345', '2345-6789-0123-4567', 'password4', 1),
-    ('David Brown', '555 Maple St, CityB', '1988-12-05', 'Lawyer', '567-89-0123', '6789-0123-4567-8901', 'password5', 0);
+    ( 'John Doe', 'John Doe', '123 Main St, Toronto', '1990-05-15', 'Software Engineer', '123456789', '1234567890123456','1', 0),
+    ('Jane Smith', 'Jane Smith', '456 Oak Ave, Vancouver', '1988-09-22', 'Marketing Manager', '987654321', '9876543210987654','1', 1),
+    ('Michael Lee', 'Michael Lee', '789 Elm Rd, Montreal', '1995-02-10', 'Student', '654321987', '6543219876543210','1', 0),
+    ('u1', 'u1', 'l', '1995-03-04', 'l', '8839', '9578','1', 0),
+    ('a1', 'a1', '7', '1995-02-04', 'l7', '8989', '978','1', 1),
+    ('u', 'u', 'f', '1995-02-04', 'l', '89', '98','1', 0),
+    ('a', 'a',  ' dfg', '1995-02-07', 'o', '67', '56','1', 1);
+
 
 INSERT INTO listings (type, latitude, longitude, address, postal_code, city, country, price)
 VALUES
@@ -151,15 +182,21 @@ VALUES
     (3, 6);
     
 
-INSERT INTO Comments (listing_id, description, rating)
+INSERT INTO Comments (listing_id, user_id, description, rating)
 VALUES
-    (1, 'The place was amazing and had a great view.', 5),
-    (1, 'Enjoyed my stay here, highly recommended!', 4),
-    (2, 'Nice location and spacious rooms.', 4),
-    (3, 'Not a pleasant experience, room was dirty.', 2),
-    (4, 'Beautiful interior and comfortable beds.', 5),
-    (4, 'Beautiful interior and comfortable chairs.', 5);
+    (1, 2, 'The place was amazing and had a great view.', 5),
+    (1, 3, 'Enjoyed my stay here, highly recommended!', 4),
+    (2, 4, 'Nice location and spacious rooms.', 4),
+    (3, 5, 'Not a pleasant experience, room was dirty.', 2),
+    (4, 1, 'Beautiful interior and comfortable beds.', 5),
+    (4, 3, 'Beautiful interior and comfortable chairs.', 5);
 
+INSERT INTO hostComments (listing_id, renter_name, description, rating)
+VALUES
+    (1, 'John Doe', 'Terrible renter', 5),
+    (2, 'u1', 'Great renter', 4),
+    (3, 'Michael Lee', 'Kind renter', 4),
+    (4, 'u', 'Nice person and kind renter', 5);
 
 
 COMMIT;
