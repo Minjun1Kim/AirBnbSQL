@@ -10,7 +10,7 @@ public class Listing {
     private String amenities;
     private double price;
 
-    public Listing(int listingId, String type, double latitude, double longitude, String address, String postalCode, String city, String country, String amenities, double price) {
+    public Listing(int listingId, String type, double latitude, double longitude, String address, String postalCode, String city, String country, double price) {
         this.listingId = listingId;
         this.type = type;
         this.latitude = latitude;
@@ -19,7 +19,6 @@ public class Listing {
         this.postalCode = postalCode;
         this.city = city;
         this.country = country;
-        this.amenities = amenities;
         this.price = price;
     }
 
@@ -34,7 +33,6 @@ public class Listing {
                 ", postalCode='" + postalCode + '\'' +
                 ", city='" + city + '\'' +
                 ", country='" + country + '\'' +
-                ", amenities='" + amenities + '\'' +
                 ", price=" + price +
                 '}';
     }

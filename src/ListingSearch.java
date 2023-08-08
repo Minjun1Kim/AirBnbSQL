@@ -35,10 +35,9 @@ public class ListingSearch {
                 String postalCode = resultSet.getString("postal_code");
                 String city = resultSet.getString("city");
                 String country = resultSet.getString("country");
-                String amenities = resultSet.getString("amenities");
                 double price = resultSet.getDouble("price");
 
-                Listing listing = new Listing(listingId, type, latitude, longitude, address, postalCode, city, country, amenities, price);
+                Listing listing = new Listing(listingId, type, latitude, longitude, address, postalCode, city, country, price);
                 results.add(listing);
             }
         } catch (SQLException e) {
