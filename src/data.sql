@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS amenities;
 
 
+
 CREATE TABLE users (
                        user_id INT AUTO_INCREMENT PRIMARY KEY,
                        name VARCHAR(100) NOT NULL,
@@ -32,6 +33,25 @@ CREATE TABLE listings (
                           country VARCHAR(100),
                           price DECIMAL(10, 2)
 );
+
+
+CREATE TABLE Comments (
+                          comment_id INT AUTO_INCREMENT PRIMARY KEY,
+                          listing_id INT NOT NULL,
+                          description TEXT NOT NULL,
+                          rating INT NOT NULL  CHECK (rating >= 1 AND rating <= 5),
+                          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
+);
+
+CREATE TABLE NounPhrases (
+                             id INT AUTO_INCREMENT PRIMARY KEY,
+                             listing_id INT NOT NULL,
+                             noun_phrase TEXT NOT NULL,
+                             count INT NOT NULL,
+                             FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
+);
+
 
 CREATE TABLE user_listings (
                                user_id INT,
@@ -106,11 +126,22 @@ VALUES
 
 INSERT INTO user_listings (user_id, listing_id)
 VALUES
-    (1, 1),
+   (1, 1),
     (1, 2),
     (2, 3),
     (2, 4),
     (3, 5),
     (3, 6);
+    
+
+INSERT INTO Comments (listing_id, description, rating)
+VALUES
+    (1, 'The place was amazing and had a great view.', 5),
+    (1, 'Enjoyed my stay here, highly recommended!', 4),
+    (2, 'Nice location and spacious rooms.', 4),
+    (3, 'Not a pleasant experience, room was dirty.', 2),
+    (4, 'Beautiful interior and comfortable beds.', 5),
+    (4, 'Beautiful interior and comfortable chairs.', 5);
+
 
 COMMIT;
