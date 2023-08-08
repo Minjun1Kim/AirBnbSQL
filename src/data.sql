@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS amenities;
 CREATE TABLE users (
                        user_id INT AUTO_INCREMENT PRIMARY KEY,
                        name VARCHAR(100) NOT NULL,
+                       real_name VARCHAR(100),
                        address VARCHAR(200),
                        date_of_birth DATE,
                        occupation VARCHAR(100),
@@ -70,6 +71,7 @@ CREATE TABLE listings_amenities (
         FOREIGN KEY (listing_id) REFERENCES listings (listing_id)
 );
 
+
 CREATE TABLE amenities (
                            amenity_id INT PRIMARY KEY AUTO_INCREMENT,
                            amenity_name VARCHAR(100) NOT NULL
@@ -83,6 +85,21 @@ CREATE TABLE bookings (
                           end_date DATE,
                           FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
                           FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+CREATE TABLE user_cancellations (
+                                    user_id INT,
+                                    year INT,
+                                    cancellations_count INT,
+                                    PRIMARY KEY (user_id, year),
+                                    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+CREATE TABLE user_deletions (
+                                user_id INT,
+                                deletion_count INT,
+                                PRIMARY KEY (user_id),
+                                FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 
@@ -142,6 +159,7 @@ VALUES
     (3, 'Not a pleasant experience, room was dirty.', 2),
     (4, 'Beautiful interior and comfortable beds.', 5),
     (4, 'Beautiful interior and comfortable chairs.', 5);
+
 
 
 COMMIT;
