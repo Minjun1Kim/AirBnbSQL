@@ -1,13 +1,16 @@
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.sql.*;
 import java.util.Date;
 
 public class OptionPage {
     private static Scanner scanner = new Scanner(System.in);
 
-    public static void displayOptions(Connection connection) {
+    public static void displayOptions(Connection connection) throws SQLException {
         System.out.println("Welcome to the Options Page!");
         boolean running = true;
 
@@ -245,6 +248,7 @@ public class OptionPage {
             e.printStackTrace();
         }
     }
+
 
 
 
@@ -599,5 +603,30 @@ public class OptionPage {
         deleteBookingStatement.close();
 
         return rowsAffected > 0;
+
+    public static void searchCoordinates(Connection connection) throws SQLException {
+        // Implement your logic for Option 3 here
+
+        Scanner scanner2 = new Scanner(System.in);
+
+        System.out.print("Enter the latitude of the search location: ");
+        double searchLat = scanner2.nextDouble();
+
+        System.out.print("Enter the longitude of the search location: ");
+        double searchLong = scanner2.nextDouble();
+
+        System.out.print("Enter the maximum distance (in kilometers): ");
+        double maxDistance = scanner2.nextDouble();
+
+        scanner2.close();
+
+        List<Listing> results = ListingSearch.searchListingsByLocation(connection, searchLat, searchLong, maxDistance);
+
+        if (results.isEmpty()) {
+            System.out.println("No listings found within the specified distance.");
+        } else {
+            ListingSearch.printSearchResults(results);
+        }
+
     }
 }

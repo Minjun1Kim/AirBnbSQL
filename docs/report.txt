@@ -1,0 +1,54 @@
+Country: Canada, Total Listings: 11
+
+Country: Canada, City: Toronto, Total Listings: 5
+Country: Canada, City: Vancouver, Total Listings: 1
+Country: Canada, City: Montreal, Total Listings: 1
+Country: Canada, City: Ottawa, Total Listings: 1
+Country: Canada, City: Oakville, Total Listings: 1
+Country: Canada, City: Kitchener, Total Listings: 2
+
+Country: Canada, City: Toronto, Postal Code: M4W 1J7, Total Listings: 1
+Country: Canada, City: Vancouver, Postal Code: V6C 1T2, Total Listings: 1
+Country: Canada, City: Montreal, Postal Code: H3A 0A1, Total Listings: 1
+Country: Canada, City: Toronto, Postal Code: M5G 2N8, Total Listings: 1
+Country: Canada, City: Ottawa, Postal Code: K1R 5A7, Total Listings: 1
+Country: Canada, City: Toronto, Postal Code: M5H 2M9, Total Listings: 1
+Country: Canada, City: Oakville, Postal Code: L6J 2Z4, Total Listings: 1
+Country: Canada, City: Kitchener, Postal Code: N2G 2M5, Total Listings: 1
+Country: Canada, City: Toronto, Postal Code: M2L 1K9, Total Listings: 1
+Country: Canada, City: Kitchener, Postal Code: N2H 1E7, Total Listings: 1
+Country: Canada, City: Toronto, Postal Code: M3C 1P6, Total Listings: 1
+
+Ranking by Total Listings Per Country:
+
+Country: Canada
+Host: John Doe, Total Listings: 2
+Host: Jane Smith, Total Listings: 2
+Host: Michael Johnson, Total Listings: 2
+
+Ranking by Total Listings Per City:
+City: Montreal, Host: Jane Smith, Total Listings: 1
+City: Ottawa, Host: Michael Johnson, Total Listings: 1
+City: Toronto, Host: John Doe, Total Listings: 1
+City: Toronto, Host: Jane Smith, Total Listings: 1
+City: Toronto, Host: Michael Johnson, Total Listings: 1
+City: Vancouver, Host: John Doe, Total Listings: 1
+
+Possible Commercial Hosts:
+User: John Doe, City: Toronto, Country: Canada, Host Listings: 1, Total Listings: 1
+User: John Doe, City: Vancouver, Country: Canada, Host Listings: 1, Total Listings: 1
+User: Jane Smith, City: Montreal, Country: Canada, Host Listings: 1, Total Listings: 1
+User: Jane Smith, City: Toronto, Country: Canada, Host Listings: 1, Total Listings: 1
+User: Michael Johnson, City: Ottawa, Country: Canada, Host Listings: 1, Total Listings: 1
+User: Michael Johnson, City: Toronto, Country: Canada, Host Listings: 1, Total Listings: 1
+
+Renter Booking Ranking Report:
+User: Jane Smith, Total Bookings: 3
+User: John Doe, Total Bookings: 2
+User: Michael Johnson, Total Bookings: 2
+User: Emily Williams, Total Bookings: 2
+User: David Brown, Total Bookings: 2
+
+Renter Booking Ranking Report per City:
+User: Jane Smith, City: Toronto, Total Bookings: 2
+

@@ -36,7 +36,7 @@ public class LogIn {
         return isAdmin;
     }
 
-    public static void displayLoginMessage(boolean loginSuccessful, boolean isAdmin, Connection connection) {
+    public static void displayLoginMessage(boolean loginSuccessful, boolean isAdmin, Connection connection) throws SQLException {
         if (loginSuccessful) {
             System.out.println("Login successful!");
 
