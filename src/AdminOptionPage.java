@@ -67,7 +67,7 @@ public class AdminOptionPage {
             System.out.print("Enter country: ");
             String country = scanner.nextLine();
 
-            System.out.print("Enter amenities (comma-separated): ");
+            System.out.print("Enter amenities (comma-separated | put none if not applicable): ");
             String amenities = scanner.nextLine();
 
             System.out.print("Enter price: ");
@@ -282,8 +282,8 @@ public class AdminOptionPage {
 
     private static void performAdminOption3(Connection connection) {
         try {
-            System.out.println("Delete a listing:");
-
+            System.out.println("Delete a listing from:");
+            performAdminOption2(connection);
             Scanner scanner = new Scanner(System.in);
 
             // Ask the admin to enter the listing ID to be deleted
@@ -298,6 +298,11 @@ public class AdminOptionPage {
                     if (!isListingBooked(connection, listingId)) {
                         // Perform the deletion operation
                         deleteListing(connection, listingId);
+
+                        // Update the deletion count for the admin user
+                        int userId = UserContext.getLoggedInUserId();
+                        updateDeletionCount(connection, userId);
+
                         System.out.println("Listing deleted successfully.");
                     } else {
                         System.out.println("The listing is currently booked and cannot be deleted.");
@@ -311,6 +316,36 @@ public class AdminOptionPage {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void updateDeletionCount(Connection connection, int userId) throws SQLException {
+        String selectQuery = "SELECT deletion_count FROM user_deletions WHERE user_id = ?";
+        String insertQuery = "INSERT INTO user_deletions (user_id, deletion_count) VALUES (?, 1)";
+        String updateQuery = "UPDATE user_deletions SET deletion_count = ? WHERE user_id = ?";
+        PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+        PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+        PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
+
+        selectStatement.setInt(1, userId);
+        ResultSet resultSet = selectStatement.executeQuery();
+
+        if (resultSet.next()) {
+            int currentDeletionCount = resultSet.getInt("deletion_count");
+            int newDeletionCount = currentDeletionCount + 1;
+
+            updateStatement.setInt(1, newDeletionCount);
+            updateStatement.setInt(2, userId);
+            updateStatement.executeUpdate();
+        } else {
+            // If the user record does not exist, insert a new record with deletion_count = 1
+            insertStatement.setInt(1, userId);
+            insertStatement.executeUpdate();
+        }
+
+        resultSet.close();
+        selectStatement.close();
+        insertStatement.close();
+        updateStatement.close();
     }
 
     private static boolean isListingExists(Connection connection, int listingId) throws SQLException {
