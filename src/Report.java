@@ -457,6 +457,90 @@ public class Report {
         }
     }
 
+    public static void generateTopCancellationsReport(Connection connection, int year) {
+        String query = "SELECT user_id, year, cancellations_count " +
+                "FROM user_cancellations " +
+                "WHERE year = ? " +
+                "ORDER BY cancellations_count DESC " +
+                "LIMIT 10;"; // Retrieve top 10 users
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, year);
+            ResultSet rs = stmt.executeQuery();
+
+            StringBuilder reportContent = new StringBuilder("Top Cancellations Report for Year " + year + ":\n");
+
+            while (rs.next()) {
+                int userId = rs.getInt("user_id");
+                int cancellationsCount = rs.getInt("cancellations_count");
+
+                String userType = ""; // Determine if it's a host or renter based on user_id
+                // You might need additional queries or logic here to determine user type
+
+                String line = "User ID: " + userId + ", Type: " + userType + ", Cancellations: " + cancellationsCount;
+                reportContent.append(line).append("\n");
+            }
+
+            reportContent.append("\n");
+
+            // Specify the file path for the report
+            String reportFilePath = inputTextFilePath;
+
+            // Write the report content to the file
+            writeToTextFile(reportContent.toString(), reportFilePath, true);
+
+            System.out.println("Top cancellations report written to: " + reportFilePath);
+
+            // Close the ResultSet and PreparedStatement
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    public static void generateTopDeletionsReport(Connection connection, int year) {
+//        String query = "SELECT u.name, d.deletion_count " +
+//                "FROM user_deletions d " +
+//                "JOIN users u ON d.user_id = u.user_id " +
+//                "WHERE d.year = ? " +
+//                "ORDER BY d.deletion_count DESC " +
+//                "LIMIT 10;";  // You can adjust the limit as needed
+//
+//        try {
+//            PreparedStatement stmt = connection.prepareStatement(query);
+//            stmt.setInt(1, year);
+//            ResultSet rs = stmt.executeQuery();
+//
+//            StringBuilder reportContent = new StringBuilder("Top Deletions Report for Year " + year + ":\n");
+//
+//            while (rs.next()) {
+//                String userName = rs.getString("name");
+//                int deletionCount = rs.getInt("deletion_count");
+//
+//                String line = "User: " + userName + ", Deletion Count: " + deletionCount;
+//                reportContent.append(line).append("\n");
+//            }
+//
+//            reportContent.append("\n");
+//
+//            // Specify the file path for the report
+//            String reportFilePath = inputTextFilePath;  // You need to define inputTextFilePath
+//
+//            // Write the report content to the file
+//            writeToTextFile(reportContent.toString(), reportFilePath, true);
+//
+//            System.out.println("Top deletions report for year " + year + " written to: " + reportFilePath);
+//
+//            // Close the ResultSet and PreparedStatement
+//            rs.close();
+//            stmt.close();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     public static void generateNounPhraseReport(Connection connection) throws SQLException {
         boolean isNounPhrasesTableEmpty = false;
         ResultSet checkRs = null;
@@ -557,6 +641,11 @@ public class Report {
         generateRenterBookingRankingReportPerCity(connection, "2023-08-01", "2023-09-01", 2);
 
         generateNounPhraseReport(connection);
+
+        System.out.print("Enter the year for the top cancellations report: ");
+        int year = scanner.nextInt();
+
+        generateTopCancellationsReport(connection, year);
 
         processFileAndGeneratePdf();
 

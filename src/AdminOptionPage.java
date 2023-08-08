@@ -114,10 +114,23 @@ public class AdminOptionPage {
                     }
 
                     insertUserListingAssociation(connection, UserContext.getLoggedInUserId(), listingId);
-                    System.out.println(UserContext.getLoggedInUsername());
+                    //System.out.println(UserContext.getLoggedInUsername());
                 }
 
                 System.out.println("New listing added successfully!");
+                double suggestedPrice = suggestAveragePrice(connection, type, listingId);
+                System.out.println("*****************************************************************************************************************************");
+                System.out.println("According to our calculation considering various factors:");
+                System.out.println("Average price for " + type + " in current market is (excluding yours): $" + suggestedPrice + " - $"+(suggestedPrice+49.723));
+                System.out.println("*****************************************************************************************************************************");
+                System.out.println("We recommend considering the following amenities to enhance your listing's appeal as other users also did:");
+
+                List<String> recommendedAmenities = recommendAmenities(connection, 1);
+                for (String amenity : recommendedAmenities) {
+                    System.out.println("- " + amenity);
+                }
+                System.out.println("*****************************************************************************************************************************");
+
             } else {
                 System.out.println("Failed to add the listing. Please try again.");
             }
@@ -127,6 +140,38 @@ public class AdminOptionPage {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    private static List<String> recommendAmenities(Connection connection, int count) throws SQLException {
+        List<String> recommendedAmenities = new ArrayList<>();
+
+        // Prepare the SQL query to select top N amenities
+        String selectQuery = "SELECT amenity_name FROM amenities ORDER BY RAND() LIMIT ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+        preparedStatement.setInt(1, count);
+
+        // Execute the SQL query
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        // Add the recommended amenities to the list
+        while (resultSet.next()) {
+            recommendedAmenities.add(resultSet.getString("amenity_name"));
+        }
+
+        return recommendedAmenities;
+    }
+
+    private static double suggestAveragePrice(Connection connection, String listingType, int excludedListingId) throws SQLException {
+        String selectQuery = "SELECT AVG(price) AS average_price FROM listings WHERE type = ? AND listing_id <> ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+        preparedStatement.setString(1, listingType);
+        preparedStatement.setInt(2, excludedListingId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        if (resultSet.next()) {
+            return resultSet.getDouble("average_price");
+        }
+
+        return 0; // Default value if no average price is found
     }
 
     private static int getAmenityId(Connection connection, String amenityName) throws SQLException {
@@ -656,11 +701,34 @@ public class AdminOptionPage {
 
         System.out.println("\nLeave a host comment");
 
+        int hostId = UserContext.getLoggedInUserId();
+
+        // Check if the host has any listings
+        boolean hasListings = false;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT user_id FROM user_listings WHERE user_id = ?"
+            );
+            preparedStatement.setInt(1, hostId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            hasListings = resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (!hasListings) {
+            System.out.println("The host has not created any listings yet. Unable to leave a host comment.");
+            return; // Return if the host has no listings
+        }
+
+        Scanner scanner = new Scanner(System.in); // Assuming scanner is declared earlier
+
         String listingId;
         String renterName;
         String description;
         int rating = 0;
-        int hostId = UserContext.getLoggedInUserId(); // Assuming this method returns the host_id
+        boolean hasBooking = false;
+        boolean listingExists = false;
 
         do {
             System.out.print("Listing id: ");
@@ -676,8 +744,44 @@ public class AdminOptionPage {
             System.out.print("Enter rating (1-5): ");
             rating = scanner.nextInt();
 
-        } while (listingId.isEmpty() || renterName.isEmpty() || description.isEmpty() || rating < 1 || rating > 5);
+            // Check if the host has created a listing with the provided listing_id
 
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "SELECT user_id FROM user_listings WHERE user_id = ? AND listing_id = ?"
+                );
+                preparedStatement.setInt(1, hostId);
+                preparedStatement.setString(2, listingId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                listingExists = resultSet.next();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            if (!listingExists) {
+                System.out.println("The host has not created a listing with the provided listing_id.");
+                continue;
+            }
+
+            // Check if there is a booking associated with the provided listing
+
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "SELECT booking_id FROM bookings WHERE listing_id = ?"
+                );
+                preparedStatement.setString(1, listingId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                hasBooking = resultSet.next();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            if (!hasBooking) {
+                System.out.println("No booking associated with the provided listing_id. Unable to leave a host comment.");
+                return;
+            }
+
+        } while (listingId.isEmpty() || renterName.isEmpty() || description.isEmpty() || rating < 1 || rating > 5 || !listingExists || !hasBooking);
 
         try {
             if (!Main.checkIfTableExists(connection, "hostComments")) {
@@ -688,10 +792,6 @@ public class AdminOptionPage {
             e.printStackTrace();
         }
     }
-
-
-
-
 
 
 

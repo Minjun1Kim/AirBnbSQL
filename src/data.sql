@@ -123,6 +123,7 @@ CREATE TABLE user_cancellations (
         PRIMARY KEY (user_id, year),
         FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
+
 CREATE TABLE user_deletions (
         user_id INT,
         deletion_count INT,

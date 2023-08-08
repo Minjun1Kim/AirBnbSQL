@@ -693,6 +693,8 @@ public class OptionPage {
                 case 3:
                     searchByPrices(connection);
                     break;
+                case 4:
+                    GeoCode.searchListingByAddress(connection);
                 default:
                     System.out.println("Invalid choice.");
             }

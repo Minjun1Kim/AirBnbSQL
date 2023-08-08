@@ -85,24 +85,24 @@ public class Comments {
 
     public static void addHostComment(Connection connection, int hostId, String listingId, String renterName,
                                       String description, int rating) throws SQLException {
-        String selectQuery = "SELECT * FROM bookings WHERE user_id = ? AND listing_id = ?";
+        String selectQuery = "SELECT * FROM user_listings WHERE user_id = ? AND listing_id = ?";
 
         try (PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
-            selectStatement.setInt(1, hostId); // Assuming host is adding comment based on their own booking
+            selectStatement.setInt(1, hostId);
             selectStatement.setString(2, listingId);
 
             try (ResultSet resultSet = selectStatement.executeQuery()) {
                 if (!resultSet.next()) {
-                    System.out.println("You can only add a comment for a listing you booked.");
+                    System.out.println("You can only add a comment for a listing you created.");
                     return;
                 }
             }
         } catch (SQLException e) {
-            System.out.println("An error occurred while checking booking: " + e.getMessage());
+            System.out.println("An error occurred while checking user listing: " + e.getMessage());
             return;
         }
 
-        String insertQuery = "INSERT INTO hostComments (listing_id, renter_name, description, rating, timestamp) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO hostComments (listing_id, renter_name, description, rating, timestamp) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             preparedStatement.setString(1, listingId);
@@ -120,6 +120,7 @@ public class Comments {
             System.out.println("An error occurred while adding the comment: " + e.getMessage());
         }
     }
+
 
 
 }

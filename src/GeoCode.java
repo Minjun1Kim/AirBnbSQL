@@ -4,6 +4,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,7 @@ public class GeoCode {
     public static void zipcodePrompt(Connection connection, Scanner scanner) throws SQLException {
 
         System.out.print("Enter a postal code: ");
-        String postalCode = scanner.nextLine().trim().replace(" ", "");
+        String postalCode = scanner.next().trim().replace(" ", "");
 
         double[] latLng = getLatLngForPostalCode(apiKey, postalCode);
 
@@ -92,4 +94,37 @@ public class GeoCode {
 
         // Close the scanner when you're done using it
     }
+
+    public static void searchListingByAddress(Connection connection) {
+        System.out.println("\nSearch Listing by Address");
+
+        System.out.print("Enter address: ");
+        String address = scanner.nextLine();
+
+        try {
+            String selectQuery = "SELECT * FROM listings WHERE address = ?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, address);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int listingId = resultSet.getInt("listing_id");
+                        String type = resultSet.getString("type");
+                        // ... extract other fields as needed
+
+                        System.out.println("Listing found:");
+                        System.out.println("Listing ID: " + listingId);
+                        System.out.println("Type: " + type);
+                        // ... print other fields
+                    } else {
+                        System.out.println("No listing found for the provided address.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("An error occurred while searching for listing: " + e.getMessage());
+        }
+    }
+
 }
