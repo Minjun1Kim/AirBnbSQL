@@ -51,10 +51,6 @@ public class Main {
                 }
                 LogIn.displayLoginMessage(loginSuccessful, isAdmin, connection);
 
-
-                LogIn.displayLoginMessage(loginSuccessful, isAdmin);
-
-
                 String bookingID = "";
                 String description="";
                 int rating = 0;
