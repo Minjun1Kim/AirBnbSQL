@@ -1,4 +1,4 @@
-Project Description:
+Project Description:\n
 The project description outlines the development of a database system for a platform similar to Airbnb, called "MyBnB." The purpose of this database is to support various operations, including listing rentals, user management, bookings, reviews, and more. The project's main components and requirements are described in detail in the project description document.
 
 Getting Started:
